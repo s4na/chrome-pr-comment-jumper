@@ -7,6 +7,7 @@ const SELECTORS = {
   authorLink: ".author, a.Link--primary[data-hovercard-type='user']",
   avatar: "img.avatar, img.avatar-user",
   outdatedContainer: ".outdated-comment",
+  expandButton: "button[aria-expanded='false'], .btn-link",
 };
 
 function extractCommentData(element, type) {
@@ -68,38 +69,50 @@ function escapeHtml(str) {
 }
 
 function createPanel() {
-  var existing = document.getElementById("pr-comment-jumper-panel");
+  const existing = document.getElementById("pr-comment-jumper-panel");
   if (existing) existing.remove();
-  var existingToggle = document.getElementById("pr-comment-jumper-toggle");
+  const existingToggle = document.getElementById("pr-comment-jumper-toggle");
   if (existingToggle) existingToggle.remove();
 
-  var toggle = document.createElement("button");
+  const toggle = document.createElement("button");
   toggle.id = "pr-comment-jumper-toggle";
   toggle.setAttribute("aria-label", "Toggle comment panel");
   toggle.textContent = "\uD83D\uDCAC";
   toggle.addEventListener("click", togglePanel);
   document.body.appendChild(toggle);
 
-  var panel = document.createElement("div");
+  const panel = document.createElement("div");
   panel.id = "pr-comment-jumper-panel";
   panel.innerHTML =
     '<div class="panel-header">' +
     "<span>Comments</span>" +
+    '<div class="panel-header-right">' +
     '<span class="comment-count"></span>' +
+    '<button class="panel-close" aria-label="Close panel">&times;</button>' +
+    "</div>" +
     "</div>" +
     '<div class="panel-body"></div>';
+
+  panel.querySelector(".panel-close").addEventListener("click", togglePanel);
   document.body.appendChild(panel);
 
   renderCommentList();
 }
 
+let lastCommentSignature = "";
+
 function renderCommentList() {
-  var panel = document.getElementById("pr-comment-jumper-panel");
+  const panel = document.getElementById("pr-comment-jumper-panel");
   if (!panel) return;
 
-  var body = panel.querySelector(".panel-body");
-  var countEl = panel.querySelector(".comment-count");
-  var comments = deduplicateComments(collectComments(document));
+  const body = panel.querySelector(".panel-body");
+  const countEl = panel.querySelector(".comment-count");
+  const comments = deduplicateComments(collectComments(document));
+
+  // Skip re-render if comment list hasn't changed
+  const signature = comments.map(function (c) { return c.author + ":" + c.preview; }).join("|");
+  if (signature === lastCommentSignature) return;
+  lastCommentSignature = signature;
 
   if (comments.length === 0) {
     body.innerHTML = '<div class="panel-empty">No comments found</div>';
@@ -111,7 +124,7 @@ function renderCommentList() {
 
   body.innerHTML = comments
     .map(function (c, i) {
-      var avatarHtml = c.avatar
+      const avatarHtml = c.avatar
         ? '<img class="comment-avatar" src="' +
           escapeHtml(c.avatar) +
           '" alt="" />'
@@ -142,7 +155,7 @@ function renderCommentList() {
     .join("");
 
   body.querySelectorAll(".comment-item").forEach(function (item) {
-    var idx = parseInt(item.getAttribute("data-index"), 10);
+    const idx = parseInt(item.getAttribute("data-index"), 10);
     item.addEventListener("click", function () {
       scrollToComment(comments[idx].element);
     });
@@ -150,13 +163,13 @@ function renderCommentList() {
 }
 
 function togglePanel() {
-  var panel = document.getElementById("pr-comment-jumper-panel");
+  const panel = document.getElementById("pr-comment-jumper-panel");
   if (!panel) return;
 
-  var isOpen = panel.classList.contains("open");
-  if (isOpen) {
+  if (panel.classList.contains("open")) {
     panel.classList.remove("open");
   } else {
+    lastCommentSignature = "";
     renderCommentList();
     panel.classList.add("open");
   }
@@ -166,16 +179,14 @@ function scrollToComment(element) {
   if (!element) return;
 
   // Expand collapsed/outdated threads if needed
-  var outdated = element.closest(SELECTORS.outdatedContainer);
+  const outdated = element.closest(SELECTORS.outdatedContainer);
   if (outdated) {
-    var showBtn = outdated.querySelector(
-      "button[aria-expanded='false'], .btn-link"
-    );
+    const showBtn = outdated.querySelector(SELECTORS.expandButton);
     if (showBtn) showBtn.click();
   }
 
   // Expand minimized comments
-  var minimized = element.closest("details:not([open])");
+  const minimized = element.closest("details:not([open])");
   if (minimized) {
     minimized.open = true;
   }
@@ -199,13 +210,13 @@ function scrollToComment(element) {
 
   // Wait for layout to settle after expanding collapsed sections
   if (outdated || minimized) {
-    setTimeout(scrollAndHighlight, 100);
+    setTimeout(scrollAndHighlight, 200);
   } else {
     scrollAndHighlight();
   }
 }
 
-var currentObserver = null;
+let currentObserver = null;
 
 function setupObserver() {
   if (currentObserver) {
@@ -213,15 +224,15 @@ function setupObserver() {
     currentObserver = null;
   }
 
-  var debounceTimer = null;
-  var observer = new MutationObserver(function (mutations) {
-    var hasNewComments = mutations.some(function (m) {
+  let debounceTimer = null;
+  const observer = new MutationObserver(function (mutations) {
+    const hasNewComments = mutations.some(function (m) {
       return m.addedNodes.length > 0;
     });
     if (hasNewComments) {
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function () {
-        var panel = document.getElementById("pr-comment-jumper-panel");
+        const panel = document.getElementById("pr-comment-jumper-panel");
         if (panel && panel.classList.contains("open")) {
           renderCommentList();
         }
@@ -238,33 +249,50 @@ function setupObserver() {
   return observer;
 }
 
+let lastInitUrl = null;
+
 function init() {
   // Only run on PR pages (files tab or conversation)
   if (!/\/pull\/\d+/.test(window.location.pathname)) return;
 
+  // Avoid duplicate init for the same URL (e.g. initial load + turbo:load)
+  if (lastInitUrl === window.location.href && document.getElementById("pr-comment-jumper-panel")) return;
+  lastInitUrl = window.location.href;
+
+  lastCommentSignature = "";
   createPanel();
   setupObserver();
 }
 
-var initialized = false;
-
-function initOnce() {
-  if (initialized) return;
-  initialized = true;
-  init();
+function cleanup() {
+  const panel = document.getElementById("pr-comment-jumper-panel");
+  if (panel) panel.remove();
+  const toggle = document.getElementById("pr-comment-jumper-toggle");
+  if (toggle) toggle.remove();
+  if (currentObserver) {
+    currentObserver.disconnect();
+    currentObserver = null;
+  }
+  lastInitUrl = null;
+  lastCommentSignature = "";
 }
 
 // GitHub SPA navigation support
-document.addEventListener("turbo:load", function () {
-  initialized = false;
+function onTurboLoad() {
+  if (!/\/pull\/\d+/.test(window.location.pathname)) {
+    cleanup();
+    return;
+  }
   init();
-});
+}
+
+document.addEventListener("turbo:load", onTurboLoad);
 
 // Initial load
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initOnce);
+  document.addEventListener("DOMContentLoaded", function () { init(); });
 } else {
-  initOnce();
+  init();
 }
 
 // Export for testing
