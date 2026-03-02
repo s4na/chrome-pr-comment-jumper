@@ -39,8 +39,7 @@ function collectComments(rootElement) {
 
   root.querySelectorAll(SELECTORS.generalComment).forEach(function (el) {
     // Skip if already captured as review comment
-    if (el.closest(SELECTORS.reviewComment.split(", ")[0]) ||
-        el.closest(SELECTORS.reviewComment.split(", ")[1])) {
+    if (el.closest(SELECTORS.reviewComment)) {
       return;
     }
     const data = extractCommentData(el, "general");
@@ -60,9 +59,12 @@ function deduplicateComments(comments) {
 }
 
 function escapeHtml(str) {
-  var div = document.createElement("div");
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function createPanel() {
@@ -125,9 +127,9 @@ function renderCommentList() {
         escapeHtml(c.author) +
         "</span>" +
         '<span class="comment-type ' +
-        c.type +
+        escapeHtml(c.type) +
         '">' +
-        c.type +
+        escapeHtml(c.type) +
         "</span>" +
         "</div>" +
         '<div class="comment-preview">' +
@@ -195,15 +197,19 @@ function scrollToComment(element) {
 }
 
 function setupObserver() {
+  var debounceTimer = null;
   var observer = new MutationObserver(function (mutations) {
     var hasNewComments = mutations.some(function (m) {
       return m.addedNodes.length > 0;
     });
     if (hasNewComments) {
-      var panel = document.getElementById("pr-comment-jumper-panel");
-      if (panel && panel.classList.contains("open")) {
-        renderCommentList();
-      }
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        var panel = document.getElementById("pr-comment-jumper-panel");
+        if (panel && panel.classList.contains("open")) {
+          renderCommentList();
+        }
+      }, 300);
     }
   });
 

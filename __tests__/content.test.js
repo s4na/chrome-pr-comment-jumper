@@ -176,8 +176,12 @@ describe("escapeHtml", () => {
     expect(escapeHtml("a & b")).toBe("a &amp; b");
   });
 
-  test("preserves quotes (safe in text content)", () => {
-    expect(escapeHtml('"hello"')).toBe('"hello"');
+  test("escapes double quotes", () => {
+    expect(escapeHtml('"hello"')).toBe("&quot;hello&quot;");
+  });
+
+  test("escapes single quotes", () => {
+    expect(escapeHtml("'hello'")).toBe("&#39;hello&#39;");
   });
 
   test("passes through safe strings unchanged", () => {
