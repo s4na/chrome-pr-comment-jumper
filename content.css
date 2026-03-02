@@ -142,13 +142,13 @@
 }
 
 #pr-comment-jumper-panel .comment-type.review {
-  background: #ddf4ff;
-  color: #0969da;
+  background: var(--bgColor-accent-muted, #ddf4ff);
+  color: var(--fgColor-accent, #0969da);
 }
 
 #pr-comment-jumper-panel .comment-type.general {
-  background: #dafbe1;
-  color: #1a7f37;
+  background: var(--bgColor-success-muted, #dafbe1);
+  color: var(--fgColor-success, #1a7f37);
 }
 
 #pr-comment-jumper-panel .comment-preview {
@@ -169,7 +169,7 @@
 
 /* Highlight animation for scrolled-to comment */
 @keyframes pr-comment-jumper-highlight {
-  0% { box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.5); }
+  0% { box-shadow: 0 0 0 3px var(--borderColor-accent-emphasis, rgba(9, 105, 218, 0.5)); }
   100% { box-shadow: 0 0 0 3px transparent; }
 }
 

@@ -157,7 +157,15 @@ function renderCommentList() {
   body.querySelectorAll(".comment-item").forEach(function (item) {
     const idx = parseInt(item.getAttribute("data-index"), 10);
     item.addEventListener("click", function () {
-      scrollToComment(comments[idx].element);
+      const target = comments[idx].element;
+      if (target && target.isConnected) {
+        scrollToComment(target);
+      } else {
+        // Element was removed from DOM (e.g. tab switch, Turbo update);
+        // re-collect comments and re-render the list
+        lastCommentSignature = "";
+        renderCommentList();
+      }
     });
   });
 }
