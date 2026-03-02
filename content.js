@@ -107,7 +107,7 @@ function renderCommentList() {
     return;
   }
 
-  countEl.textContent = comments.length + " comments";
+  countEl.textContent = comments.length + (comments.length === 1 ? " comment" : " comments");
 
   body.innerHTML = comments
     .map(function (c, i) {
@@ -166,7 +166,7 @@ function scrollToComment(element) {
   if (!element) return;
 
   // Expand collapsed/outdated threads if needed
-  var outdated = element.closest(".outdated-comment");
+  var outdated = element.closest(SELECTORS.outdatedContainer);
   if (outdated) {
     var showBtn = outdated.querySelector(
       "button[aria-expanded='false'], .btn-link"
@@ -180,28 +180,29 @@ function scrollToComment(element) {
     minimized.open = true;
   }
 
-  // Wait for layout to settle after expanding collapsed sections
-  var needsLayoutWait = outdated || minimized;
-  if (needsLayoutWait) {
-    requestAnimationFrame(function () {
-      element.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-  } else {
+  function scrollAndHighlight() {
     element.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    element.classList.remove("pr-comment-jumper-highlight");
+    // Force reflow to restart animation
+    void element.offsetWidth;
+    element.classList.add("pr-comment-jumper-highlight");
+
+    element.addEventListener(
+      "animationend",
+      function () {
+        element.classList.remove("pr-comment-jumper-highlight");
+      },
+      { once: true }
+    );
   }
 
-  element.classList.remove("pr-comment-jumper-highlight");
-  // Force reflow to restart animation
-  void element.offsetWidth;
-  element.classList.add("pr-comment-jumper-highlight");
-
-  element.addEventListener(
-    "animationend",
-    function () {
-      element.classList.remove("pr-comment-jumper-highlight");
-    },
-    { once: true }
-  );
+  // Wait for layout to settle after expanding collapsed sections
+  if (outdated || minimized) {
+    setTimeout(scrollAndHighlight, 100);
+  } else {
+    scrollAndHighlight();
+  }
 }
 
 var currentObserver = null;
@@ -245,14 +246,25 @@ function init() {
   setupObserver();
 }
 
+var initialized = false;
+
+function initOnce() {
+  if (initialized) return;
+  initialized = true;
+  init();
+}
+
 // GitHub SPA navigation support
-document.addEventListener("turbo:load", init);
+document.addEventListener("turbo:load", function () {
+  initialized = false;
+  init();
+});
 
 // Initial load
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded", initOnce);
 } else {
-  init();
+  initOnce();
 }
 
 // Export for testing
