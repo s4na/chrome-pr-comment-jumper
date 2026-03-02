@@ -180,7 +180,15 @@ function scrollToComment(element) {
     minimized.open = true;
   }
 
-  element.scrollIntoView({ behavior: "smooth", block: "center" });
+  // Wait for layout to settle after expanding collapsed sections
+  var needsLayoutWait = outdated || minimized;
+  if (needsLayoutWait) {
+    requestAnimationFrame(function () {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  } else {
+    element.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 
   element.classList.remove("pr-comment-jumper-highlight");
   // Force reflow to restart animation
@@ -196,7 +204,14 @@ function scrollToComment(element) {
   );
 }
 
+var currentObserver = null;
+
 function setupObserver() {
+  if (currentObserver) {
+    currentObserver.disconnect();
+    currentObserver = null;
+  }
+
   var debounceTimer = null;
   var observer = new MutationObserver(function (mutations) {
     var hasNewComments = mutations.some(function (m) {
@@ -218,6 +233,7 @@ function setupObserver() {
     subtree: true,
   });
 
+  currentObserver = observer;
   return observer;
 }
 
