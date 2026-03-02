@@ -1,0 +1,14 @@
+{
+  "name": "chrome-pr-comment-jumper",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Chrome extension to jump between PR comments on GitHub",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}

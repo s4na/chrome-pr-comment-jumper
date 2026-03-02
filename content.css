@@ -1,0 +1,178 @@
+/* PR Comment Jumper - Panel Styles */
+
+#pr-comment-jumper-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  background: var(--bgColor-default, #ffffff);
+  color: var(--fgColor-default, #1f2328);
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(31, 35, 40, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+#pr-comment-jumper-toggle:hover {
+  background: var(--bgColor-muted, #f6f8fa);
+}
+
+#pr-comment-jumper-panel {
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  bottom: 80px;
+  width: 360px;
+  z-index: 99;
+  background: var(--bgColor-default, #ffffff);
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(31, 35, 40, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+}
+
+#pr-comment-jumper-panel.open {
+  display: flex;
+}
+
+#pr-comment-jumper-panel .panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--borderColor-default, #d0d7de);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fgColor-default, #1f2328);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+#pr-comment-jumper-panel .panel-header .panel-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#pr-comment-jumper-panel .panel-header .comment-count {
+  font-weight: 400;
+  color: var(--fgColor-muted, #656d76);
+  font-size: 12px;
+}
+
+#pr-comment-jumper-panel .panel-header .panel-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 2px;
+  color: var(--fgColor-muted, #656d76);
+  border-radius: 4px;
+}
+
+#pr-comment-jumper-panel .panel-header .panel-close:hover {
+  color: var(--fgColor-default, #1f2328);
+  background: var(--bgColor-muted, #f6f8fa);
+}
+
+#pr-comment-jumper-panel .panel-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+#pr-comment-jumper-panel .comment-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--borderColor-default, #d0d7de);
+  cursor: pointer;
+  transition: background 0.1s ease;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+#pr-comment-jumper-panel .comment-item:hover {
+  background: var(--bgColor-muted, #f6f8fa);
+}
+
+#pr-comment-jumper-panel .comment-item:last-child {
+  border-bottom: none;
+}
+
+#pr-comment-jumper-panel .comment-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+#pr-comment-jumper-panel .comment-content {
+  flex: 1;
+  min-width: 0;
+}
+
+#pr-comment-jumper-panel .comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+#pr-comment-jumper-panel .comment-author {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fgColor-default, #1f2328);
+}
+
+#pr-comment-jumper-panel .comment-type {
+  font-size: 10px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+#pr-comment-jumper-panel .comment-type.review {
+  background: var(--bgColor-accent-muted, #ddf4ff);
+  color: var(--fgColor-accent, #0969da);
+}
+
+#pr-comment-jumper-panel .comment-type.general {
+  background: var(--bgColor-success-muted, #dafbe1);
+  color: var(--fgColor-success, #1a7f37);
+}
+
+#pr-comment-jumper-panel .comment-preview {
+  font-size: 12px;
+  color: var(--fgColor-muted, #656d76);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#pr-comment-jumper-panel .panel-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--fgColor-muted, #656d76);
+  font-size: 13px;
+}
+
+/* Highlight animation for scrolled-to comment */
+@keyframes pr-comment-jumper-highlight {
+  0% { box-shadow: 0 0 0 3px var(--borderColor-accent-emphasis, rgba(9, 105, 218, 0.5)); }
+  100% { box-shadow: 0 0 0 3px transparent; }
+}
+
+.pr-comment-jumper-highlight {
+  animation: pr-comment-jumper-highlight 1.5s ease-out;
+}
