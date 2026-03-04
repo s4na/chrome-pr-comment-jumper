@@ -3,7 +3,7 @@
 #pr-comment-jumper-toggle {
   position: fixed;
   bottom: 24px;
-  left: 24px;
+  right: 24px;
   z-index: 100;
   width: 44px;
   height: 44px;
@@ -27,7 +27,7 @@
 #pr-comment-jumper-panel {
   position: fixed;
   top: 60px;
-  left: 16px;
+  right: 16px;
   bottom: 80px;
   width: 360px;
   z-index: 99;
