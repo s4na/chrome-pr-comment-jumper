@@ -96,6 +96,14 @@ function createPanel() {
   panel.querySelector(".panel-close").addEventListener("click", togglePanel);
   document.body.appendChild(panel);
 
+  document.addEventListener("click", function (e) {
+    if (panel.classList.contains("open") &&
+        !panel.contains(e.target) &&
+        e.target !== toggle) {
+      panel.classList.remove("open");
+    }
+  });
+
   renderCommentList();
 }
 
