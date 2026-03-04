@@ -49,6 +49,16 @@ npm install
 npm test
 ```
 
+### ビルド（配布用）
+
+`dist/` に拡張機能に必要なファイルのみをコピーします。
+
+```bash
+npm run build
+```
+
+Chrome Web Storeへの公開やパッケージサイズを最小化したい場合は、`dist/` ディレクトリを使用してください。
+
 ## License
 
 MIT
