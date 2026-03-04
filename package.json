@@ -5,8 +5,7 @@
   "license": "MIT",
   "description": "Chrome extension to jump between PR comments on GitHub",
   "scripts": {
-    "test": "jest",
-    "build": "rm -rf dist && mkdir -p dist/icons && cp manifest.json content.js content.css dist/ && cp icons/* dist/icons/"
+    "test": "jest"
   },
   "devDependencies": {
     "jest": "^29.7.0",
