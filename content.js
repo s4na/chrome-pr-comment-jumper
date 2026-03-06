@@ -208,7 +208,7 @@ function scrollToComment(element) {
   }
 
   function scrollAndHighlight() {
-    element.scrollIntoView({ behavior: "smooth", block: "center" });
+    element.scrollIntoView({ behavior: "smooth", block: "start" });
 
     element.classList.remove("pr-comment-jumper-highlight");
     // Force reflow to restart animation
