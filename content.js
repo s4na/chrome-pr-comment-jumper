@@ -100,7 +100,7 @@ function createPanel() {
     if (panel.classList.contains("open") &&
         !panel.contains(e.target) &&
         e.target !== toggle) {
-      setPanelOpen(false);
+      panel.classList.remove("open");
     }
   });
 
@@ -178,28 +178,17 @@ function renderCommentList() {
   });
 }
 
-function setPanelOpen(open) {
-  const panel = document.getElementById("pr-comment-jumper-panel");
-  if (!panel) return;
-
-  if (open) {
-    lastCommentSignature = "";
-    renderCommentList();
-    panel.classList.add("open");
-  } else {
-    panel.classList.remove("open");
-  }
-
-  if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.set({ panelOpen: open });
-  }
-}
-
 function togglePanel() {
   const panel = document.getElementById("pr-comment-jumper-panel");
   if (!panel) return;
 
-  setPanelOpen(!panel.classList.contains("open"));
+  if (panel.classList.contains("open")) {
+    panel.classList.remove("open");
+  } else {
+    lastCommentSignature = "";
+    renderCommentList();
+    panel.classList.add("open");
+  }
 }
 
 function scrollToComment(element) {
@@ -290,15 +279,6 @@ function init() {
   lastCommentSignature = "";
   createPanel();
   setupObserver();
-
-  // Restore panel open/close state
-  if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get("panelOpen", function (result) {
-      if (result.panelOpen) {
-        setPanelOpen(true);
-      }
-    });
-  }
 }
 
 function cleanup() {
