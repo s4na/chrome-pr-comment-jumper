@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PR Comment Jumper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Jump between comments on GitHub Pull Request pages",
   "content_scripts": [
     {
