@@ -340,5 +340,9 @@ if (typeof module !== "undefined" && module.exports) {
     collectComments: collectComments,
     deduplicateComments: deduplicateComments,
     escapeHtml: escapeHtml,
+    scrollToComment: scrollToComment,
+    setPanelOpen: setPanelOpen,
+    togglePanel: togglePanel,
+    createPanel: createPanel,
   };
 }

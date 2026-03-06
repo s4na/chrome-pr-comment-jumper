@@ -1,9 +1,25 @@
+// Mock chrome.storage.local before requiring content.js
+const mockStorageSet = jest.fn();
+const mockStorageGet = jest.fn((key, cb) => cb({}));
+global.chrome = {
+  storage: {
+    local: {
+      set: mockStorageSet,
+      get: mockStorageGet,
+    },
+  },
+};
+
 const {
   SELECTORS,
   extractCommentData,
   collectComments,
   deduplicateComments,
   escapeHtml,
+  scrollToComment,
+  setPanelOpen,
+  togglePanel,
+  createPanel,
 } = require("../content");
 
 describe("extractCommentData", () => {
@@ -190,5 +206,123 @@ describe("escapeHtml", () => {
 
   test("handles empty string", () => {
     expect(escapeHtml("")).toBe("");
+  });
+});
+
+describe("scrollToComment", () => {
+  beforeEach(() => {
+    window.scrollBy = jest.fn();
+  });
+
+  test("does nothing for null element", () => {
+    scrollToComment(null);
+    expect(window.scrollBy).not.toHaveBeenCalled();
+  });
+
+  test("scrolls to element top with 10px offset", () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    el.getBoundingClientRect = jest.fn(() => ({ top: 200 }));
+
+    scrollToComment(el);
+
+    expect(window.scrollBy).toHaveBeenCalledWith({
+      top: 190,
+      behavior: "smooth",
+    });
+    document.body.removeChild(el);
+  });
+
+  test("adds highlight class after scroll", () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    el.getBoundingClientRect = jest.fn(() => ({ top: 100 }));
+
+    scrollToComment(el);
+
+    expect(el.classList.contains("pr-comment-jumper-highlight")).toBe(true);
+    document.body.removeChild(el);
+  });
+});
+
+describe("setPanelOpen", () => {
+  beforeEach(() => {
+    mockStorageSet.mockClear();
+    // Create panel in DOM
+    const panel = document.createElement("div");
+    panel.id = "pr-comment-jumper-panel";
+    panel.innerHTML =
+      '<div class="panel-header"><span>Comments</span>' +
+      '<div class="panel-header-right"><span class="comment-count"></span>' +
+      '<button class="panel-close">&times;</button></div></div>' +
+      '<div class="panel-body"></div>';
+    document.body.appendChild(panel);
+  });
+
+  afterEach(() => {
+    const panel = document.getElementById("pr-comment-jumper-panel");
+    if (panel) panel.remove();
+  });
+
+  test("opens panel and persists state", () => {
+    setPanelOpen(true);
+
+    const panel = document.getElementById("pr-comment-jumper-panel");
+    expect(panel.classList.contains("open")).toBe(true);
+    expect(mockStorageSet).toHaveBeenCalledWith({ panelOpen: true });
+  });
+
+  test("closes panel and persists state", () => {
+    const panel = document.getElementById("pr-comment-jumper-panel");
+    panel.classList.add("open");
+
+    setPanelOpen(false);
+
+    expect(panel.classList.contains("open")).toBe(false);
+    expect(mockStorageSet).toHaveBeenCalledWith({ panelOpen: false });
+  });
+
+  test("does nothing when panel not in DOM", () => {
+    document.getElementById("pr-comment-jumper-panel").remove();
+
+    setPanelOpen(true);
+    expect(mockStorageSet).not.toHaveBeenCalled();
+  });
+});
+
+describe("togglePanel", () => {
+  beforeEach(() => {
+    mockStorageSet.mockClear();
+    const panel = document.createElement("div");
+    panel.id = "pr-comment-jumper-panel";
+    panel.innerHTML =
+      '<div class="panel-header"><span>Comments</span>' +
+      '<div class="panel-header-right"><span class="comment-count"></span>' +
+      '<button class="panel-close">&times;</button></div></div>' +
+      '<div class="panel-body"></div>';
+    document.body.appendChild(panel);
+  });
+
+  afterEach(() => {
+    const panel = document.getElementById("pr-comment-jumper-panel");
+    if (panel) panel.remove();
+  });
+
+  test("opens closed panel", () => {
+    togglePanel();
+
+    const panel = document.getElementById("pr-comment-jumper-panel");
+    expect(panel.classList.contains("open")).toBe(true);
+    expect(mockStorageSet).toHaveBeenCalledWith({ panelOpen: true });
+  });
+
+  test("closes open panel", () => {
+    const panel = document.getElementById("pr-comment-jumper-panel");
+    panel.classList.add("open");
+
+    togglePanel();
+
+    expect(panel.classList.contains("open")).toBe(false);
+    expect(mockStorageSet).toHaveBeenCalledWith({ panelOpen: false });
   });
 });
