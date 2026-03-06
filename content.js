@@ -208,7 +208,8 @@ function scrollToComment(element) {
   }
 
   function scrollAndHighlight() {
-    element.scrollIntoView({ behavior: "smooth", block: "start" });
+    var rect = element.getBoundingClientRect();
+    window.scrollBy({ top: rect.top - 10, behavior: "smooth" });
 
     element.classList.remove("pr-comment-jumper-highlight");
     // Force reflow to restart animation
