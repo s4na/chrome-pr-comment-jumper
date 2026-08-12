@@ -1,10 +1,17 @@
 /* PR Comment Jumper - Panel Styles */
 
-#pr-comment-jumper-toggle {
+#s4na-github-floating-actions {
   position: fixed;
-  bottom: 24px;
   right: 24px;
+  bottom: 24px;
   z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+#pr-comment-jumper-toggle {
   width: 44px;
   height: 44px;
   border-radius: 50%;

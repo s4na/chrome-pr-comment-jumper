@@ -51,3 +51,8 @@ npm test
 ## License
 
 MIT
+
+
+## 他の右下固定ボタンとの共存
+
+`#s4na-github-floating-actions` を共通コンテナとして使用します。同じ規約に対応した別のChrome拡張がある場合、各ボタンはアプリケーション名の英字昇順で上から並びます。

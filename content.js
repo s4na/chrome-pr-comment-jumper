@@ -68,6 +68,32 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+const FLOATING_ACTION_CONTAINER_ID = "s4na-github-floating-actions";
+const FLOATING_ACTION_ATTRIBUTE = "data-s4na-floating-action";
+const APPLICATION_NAME = "chrome-pr-comment-jumper";
+
+function registerFloatingAction(button) {
+  let container = document.getElementById(FLOATING_ACTION_CONTAINER_ID);
+  if (!container) {
+    container = document.createElement("div");
+    container.id = FLOATING_ACTION_CONTAINER_ID;
+    document.body.appendChild(container);
+  }
+
+  button.setAttribute(FLOATING_ACTION_ATTRIBUTE, APPLICATION_NAME);
+  container.appendChild(button);
+
+  Array.from(container.querySelectorAll("[" + FLOATING_ACTION_ATTRIBUTE + "]"))
+    .sort(function (left, right) {
+      return left
+        .getAttribute(FLOATING_ACTION_ATTRIBUTE)
+        .localeCompare(right.getAttribute(FLOATING_ACTION_ATTRIBUTE), "en");
+    })
+    .forEach(function (action) {
+      container.appendChild(action);
+    });
+}
+
 function createPanel() {
   const existing = document.getElementById("pr-comment-jumper-panel");
   if (existing) existing.remove();
@@ -79,7 +105,7 @@ function createPanel() {
   toggle.setAttribute("aria-label", "Toggle comment panel");
   toggle.textContent = "\uD83D\uDCAC";
   toggle.addEventListener("click", togglePanel);
-  document.body.appendChild(toggle);
+  registerFloatingAction(toggle);
 
   const panel = document.createElement("div");
   panel.id = "pr-comment-jumper-panel";
@@ -286,6 +312,10 @@ function cleanup() {
   if (panel) panel.remove();
   const toggle = document.getElementById("pr-comment-jumper-toggle");
   if (toggle) toggle.remove();
+  const actionContainer = document.getElementById(FLOATING_ACTION_CONTAINER_ID);
+  if (actionContainer && actionContainer.childElementCount === 0) {
+    actionContainer.remove();
+  }
   if (currentObserver) {
     currentObserver.disconnect();
     currentObserver = null;
@@ -320,5 +350,8 @@ if (typeof module !== "undefined" && module.exports) {
     collectComments: collectComments,
     deduplicateComments: deduplicateComments,
     escapeHtml: escapeHtml,
+    registerFloatingAction: registerFloatingAction,
+    FLOATING_ACTION_CONTAINER_ID: FLOATING_ACTION_CONTAINER_ID,
+    FLOATING_ACTION_ATTRIBUTE: FLOATING_ACTION_ATTRIBUTE,
   };
 }
