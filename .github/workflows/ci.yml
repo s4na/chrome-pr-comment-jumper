@@ -9,11 +9,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PUPPETEER_SKIP_CHROME_HEADLESS_SHELL_DOWNLOAD: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npm test
+      - run: npm run test:e2e
