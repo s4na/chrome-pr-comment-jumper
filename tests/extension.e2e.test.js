@@ -35,7 +35,7 @@ test("loads in Chrome and opens the comment panel from a fixed button", async ()
       const container = document.getElementById("s4na-github-floating-actions");
       container.insertAdjacentHTML(
         "beforeend",
-        '<button data-s4na-floating-action="aaa-extension">A</button>',
+        '<button data-s4na-floating-action="zzz-extension">Z</button>',
       );
       document.body.insertAdjacentHTML(
         "afterbegin",
@@ -50,7 +50,7 @@ test("loads in Chrome and opens the comment panel from a fixed button", async ()
       await page.$$eval("[data-s4na-floating-action]", (elements) =>
         elements.map((element) => element.dataset.s4naFloatingAction),
       ),
-      ["aaa-extension", "chrome-pr-comment-jumper"],
+      ["chrome-pr-comment-jumper", "zzz-extension"],
     );
     await page.click("#pr-comment-jumper-toggle");
     await page.waitForSelector("#pr-comment-jumper-panel.open", { visible: true });
