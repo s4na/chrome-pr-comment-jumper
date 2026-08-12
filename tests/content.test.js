@@ -4,6 +4,9 @@ const {
   collectComments,
   deduplicateComments,
   escapeHtml,
+  registerFloatingAction,
+  FLOATING_ACTION_CONTAINER_ID,
+  FLOATING_ACTION_ATTRIBUTE,
 } = require("../content");
 
 describe("extractCommentData", () => {
@@ -190,5 +193,35 @@ describe("escapeHtml", () => {
 
   test("handles empty string", () => {
     expect(escapeHtml("")).toBe("");
+  });
+});
+
+describe("registerFloatingAction", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  test("shares one floating container and sorts actions by application name", () => {
+    const laterAction = document.createElement("button");
+    laterAction.setAttribute(FLOATING_ACTION_ATTRIBUTE, "z-extension");
+
+    const container = document.createElement("div");
+    container.id = FLOATING_ACTION_CONTAINER_ID;
+    container.appendChild(laterAction);
+    document.body.appendChild(container);
+
+    const jumperAction = document.createElement("button");
+    registerFloatingAction(jumperAction);
+
+    const names = Array.from(container.children).map((element) =>
+      element.getAttribute(FLOATING_ACTION_ATTRIBUTE)
+    );
+    expect(names).toEqual(["chrome-pr-comment-jumper", "z-extension"]);
+  });
+
+  test("creates the shared container when no other extension has", () => {
+    registerFloatingAction(document.createElement("button"));
+
+    expect(document.querySelectorAll("#" + FLOATING_ACTION_CONTAINER_ID)).toHaveLength(1);
   });
 });
