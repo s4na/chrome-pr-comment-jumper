@@ -35,13 +35,14 @@ test("loads in Chrome and opens the comment panel from a fixed button", async ()
       const container = document.getElementById("s4na-github-floating-actions");
       container.insertAdjacentHTML(
         "beforeend",
-        '<button data-s4na-floating-action="zzz-extension">Z</button>',
+        '<button data-s4na-floating-action="aaa-extension">A</button>',
       );
       document.body.insertAdjacentHTML(
         "afterbegin",
         '<div class="timeline-comment"><a class="author">test-user</a>' +
           '<div class="comment-body">E2E fixture comment</div></div>',
       );
+      document.getElementById("pr-comment-jumper-panel").remove();
       document.dispatchEvent(new Event("turbo:load"));
     });
     assert.equal(await page.$eval("#s4na-github-floating-actions", (el) => getComputedStyle(el).position), "fixed");
@@ -49,7 +50,7 @@ test("loads in Chrome and opens the comment panel from a fixed button", async ()
       await page.$$eval("[data-s4na-floating-action]", (elements) =>
         elements.map((element) => element.dataset.s4naFloatingAction),
       ),
-      ["chrome-pr-comment-jumper", "zzz-extension"],
+      ["aaa-extension", "chrome-pr-comment-jumper"],
     );
     await page.click("#pr-comment-jumper-toggle");
     await page.waitForSelector("#pr-comment-jumper-panel.open", { visible: true });
