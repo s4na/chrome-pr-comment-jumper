@@ -94,6 +94,19 @@ function registerFloatingAction(button) {
     });
 }
 
+let floatingActionObserver = null;
+
+function keepPanelAboveFloatingActions(container, panel) {
+  if (floatingActionObserver) floatingActionObserver.disconnect();
+
+  const updatePanelBottom = function () {
+    panel.style.bottom = container.getBoundingClientRect().height + 36 + "px";
+  };
+  floatingActionObserver = new ResizeObserver(updatePanelBottom);
+  floatingActionObserver.observe(container);
+  updatePanelBottom();
+}
+
 function createPanel() {
   const existing = document.getElementById("pr-comment-jumper-panel");
   if (existing) existing.remove();
@@ -121,6 +134,10 @@ function createPanel() {
 
   panel.querySelector(".panel-close").addEventListener("click", togglePanel);
   document.body.appendChild(panel);
+  keepPanelAboveFloatingActions(
+    document.getElementById(FLOATING_ACTION_CONTAINER_ID),
+    panel
+  );
 
   document.addEventListener("click", function (e) {
     if (panel.classList.contains("open") &&
@@ -308,6 +325,10 @@ function init() {
 }
 
 function cleanup() {
+  if (floatingActionObserver) {
+    floatingActionObserver.disconnect();
+    floatingActionObserver = null;
+  }
   const panel = document.getElementById("pr-comment-jumper-panel");
   if (panel) panel.remove();
   const toggle = document.getElementById("pr-comment-jumper-toggle");
